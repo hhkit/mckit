@@ -1,11 +1,12 @@
 services:
   mc:
-    image: itzg/minecraft-server:latest
+    image: itzg/minecraft-server:java21
     pull_policy: always
     tty: true
     stdin_open: true
     ports:
       - "25565:25565"
+      - "8123:8123"
     environment:
       EULA: "TRUE"
       VERSION: "1.21.1"
@@ -16,4 +17,16 @@ services:
       - ./server:/data:Z
       - ./extras:/extras:Z
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      # - /etc/timezone:/etc/timezone:ro
+  rproxy:
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+      - '8181:81'
+      - '22443:443'
+    volumes:
+      - ./nginx-data:/data:Z
+      - ./letsencrypt:/etc/letsencrypt:Z
+    links:
+      - "mc"
